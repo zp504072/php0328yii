@@ -18,6 +18,7 @@ class ArticleCategory extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+
     public static function getStatusOption($hidden=true){
         $options=[
             -1=>'删除',0=>'隐藏',1=>'显示'

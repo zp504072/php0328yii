@@ -1,7 +1,6 @@
 
 
-<?=\yii\bootstrap\Html::a('添加品牌',['brand/add',],['class'=>'btn btn-sm btn-info']) ?>
-<?=\yii\bootstrap\Html::a('回收站',['brand/recovery',],['class'=>'btn btn-sm btn-warning']) ?>
+<?=\yii\bootstrap\Html::a('首页',['brand/index',],['class'=>'btn btn-sm btn-info']) ?>
 
 <table class="table table-bordered table-condensed">
     <tr>
@@ -18,14 +17,13 @@
         <td><?=$model->id?></td>
         <td><?=$model->name?></td>
         <td><?=$model->intro?></td>
-        <td><?=$model->status?'显示':'隐藏'?></td>
+        <td>已删除</td>
         <td><?=$model->sort?></td>
         <td><?=\yii\bootstrap\Html::img($model->logo,['height'=>50])?></td>
 
 
-
-        <td><?=\yii\bootstrap\Html::a('修改',['brand/edit','id'=>$model->id],['class'=>'btn btn-sm btn-success'])?>
-            <?=\yii\bootstrap\Html::a('删除',['brand/delete','id'=>$model->id],['class'=>'btn btn-sm btn-danger'])?></td>
+        <td><?=\yii\bootstrap\Html::a('恢复',['brand/decided','id'=>$model->id],['class'=>'btn btn-sm btn-success'])?>
+            <?=\yii\bootstrap\Html::a('彻底删除',['brand/bye','id'=>$model->id],['class'=>'btn btn-sm btn-danger'])?></td>
         <?php endforeach;?>
 </table>
 <?php

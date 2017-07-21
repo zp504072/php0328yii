@@ -1,9 +1,7 @@
 <?php
 
 namespace backend\controllers;
-
 use backend\models\ArticleCategory;
-
 use yii\data\Pagination;
 use yii\web\Request;
 
@@ -13,7 +11,7 @@ class ArticleCategoryController extends \yii\web\Controller
     {
         $query=ArticleCategory::find();
         //var_dump($query);exit;
-        $total=$query->count();
+        $total=$query->where(['!=','status','-1'])->count();
         //var_dump($total);exit;
 
         $perPage = 3;
@@ -23,15 +21,17 @@ class ArticleCategoryController extends \yii\web\Controller
         ]);
 
         $articles=$query->limit($pager->limit)->offset($pager->offset)->where(['!=','status','-1'])->all();
-        return $this->render('index',['articles'=>$articles,'pager'=>$pager]);
+        return $this->render('recovery',['articles'=>$articles,'pager'=>$pager]);
     }
     public function actionAdd(){
+
         $model=new ArticleCategory();
         $request=new Request();
         if($request->isPost){
             $model->load($request->post());
             if($model->validate()){
                 //var_dump($model);exit;
+
                 $model->save();
                 \Yii::$app->session->setFlash('success','添加成功');
                 return $this->redirect(['article-category/index']);
@@ -68,5 +68,6 @@ class ArticleCategoryController extends \yii\web\Controller
         return $this->redirect(['article-category/index']);
 
     }
+
 
 }
