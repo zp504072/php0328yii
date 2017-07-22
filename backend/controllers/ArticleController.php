@@ -30,7 +30,7 @@ class ArticleController extends \yii\web\Controller
     public function actionIndex($keywords='')
     {
 
-        $query = Article::find()->where(['and', 'status>-1',"name like '{$keywords}%'"]);
+        $query = Article::find()->where(['and', 'status>-1',"name like '%{$keywords}%'"]);
         //var_dump($query);exit;
         $total = $query->count();
         //var_dump($total);exit;
