@@ -27,6 +27,9 @@ class Goods extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function getGoodsIntro(){
+        return $this->hasOne(GoodsIntro::className(),['goods_id'=>'id']);
+    }
     public static function getCategory(){
         $categories=GoodsCategory::find()->all();
         $array=[];
@@ -36,7 +39,7 @@ class Goods extends \yii\db\ActiveRecord
         return $array;
     }
     public static function getBrand(){
-        $categories=Brand::find()->all();
+        $categories=Brand::find()->where(['=', 'status', '1'])->all();
         $array=[];
         foreach($categories as $category){
             $array[$category->id]=$category->name;
@@ -54,6 +57,7 @@ class Goods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+
             [['goods_category_id', 'brand_id', 'stock', 'in_on_sale', 'status', 'sort', 'create_time', 'view_times'], 'integer'],
             [['market_price', 'shop_price'], 'number'],
             [['name', 'sn'], 'string', 'max' => 20],
@@ -83,4 +87,7 @@ class Goods extends \yii\db\ActiveRecord
             'view_times' => '浏览次数',
         ];
     }
+
+
 }
+

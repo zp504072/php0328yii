@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\filters\RbacFilter;
 use backend\models\Brand;
 use yii\data\Pagination;
 use yii\web\Request;
@@ -48,6 +49,7 @@ class BrandController extends \yii\web\Controller
     public function actionAdd(){
         $model=new Brand();
         $request=new Request();
+        //var_dump($model);exit;
         if($request->isPost){
             $model->load($request->post());
 
@@ -173,6 +175,14 @@ class BrandController extends \yii\web\Controller
        // exit;
        // $model->delete();
         return $this->redirect(['article/recovery']);
+    }
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className(),
+            ]
+        ];
     }
 
 }
