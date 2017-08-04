@@ -137,6 +137,7 @@
 
             <div class="cat_bd">
 
+
                 <div class="cat item1">
                     <h3><a href="">图像、音像、数字商品</a> <b></b></h3>
                     <div class="cat_detail">
@@ -251,103 +252,37 @@
                     </div>
                 </div>
 
-                <div class="cat">
-                    <h3><a href="">家用电器</a><b></b></h3>
-                    <div class="cat_detail">
-                        <dl class="dl_1st">
-                            <dt><a href="">大家电</a></dt>
-                            <dd>
-                                <a href="">平板电视</a>
-                                <a href="">空调</a>
-                                <a href="">冰箱</a>
-                                <a href="">洗衣机</a>
-                                <a href="">热水器</a>
-                                <a href="">DVD</a>
-                                <a href="">烟机/灶具</a>
-                            </dd>
-                        </dl>
 
-                        <dl>
-                            <dt><a href="">生活电器</a></dt>
-                            <dd>
-                                <a href="">取暖器</a>
-                                <a href="">加湿器</a>
-                                <a href="">净化器</a>
-                                <a href="">饮水机</a>
-                                <a href="">净水设备</a>
-                                <a href="">吸尘器</a>
-                                <a href="">电风扇</a>
-                            </dd>
-                        </dl>
 
-                        <dl>
-                            <dt><a href="">厨房电器</a></dt>
-                            <dd>
-                                <a href="">电饭煲</a>
-                                <a href="">豆浆机</a>
-                                <a href="">面包机</a>
-                                <a href="">咖啡机</a>
-                                <a href="">微波炉</a>
-                                <a href="">电磁炉</a>
-                                <a href="">电水壶</a>
-                            </dd>
-                        </dl>
+                <?php foreach($models as $model):?>
 
-                        <dl>
-                            <dt><a href="">个护健康</a></dt>
-                            <dd>
-                                <a href="">剃须刀</a>
-                                <a href="">电吹风</a>
-                                <a href="">按摩器</a>
-                                <a href="">足浴盆</a>
-                                <a href="">血压计</a>
-                                <a href="">体温计</a>
-                                <a href="">血糖仪</a>
-                            </dd>
-                        </dl>
-
-                        <dl>
-                            <dt><a href="">五金家装</a></dt>
-                            <dd>
-                                <a href="">灯具</a>
-                                <a href="">LED灯</a>
-                                <a href="">水槽</a>
-                                <a href="">龙头</a>
-                                <a href="">门铃</a>
-                                <a href="">电器开关</a>
-                                <a href="">插座</a>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-
-                    <?php foreach($models as $model):?>
-
-                        <div class="cat">
-                            <h3><a href="/goods/index?id=<?=$model->id?>"><?=$model->name?></a><b></b></h3>
-                            <?php $two=\backend\models\GoodsCategory::find()->where(['parent_id'=>$model->id])->all()?>
+                    <div class="cat">
+                        <h3><a href="/goods/index?id=<?=$model->id?>"><?=$model->name?></a><b></b></h3>
+                        <?php $two=\backend\models\GoodsCategory::find()->where(['parent_id'=>$model->id])->all()?>
 
 
 
-                            <div class="cat_detail">
-                                <dl class="dl_1st">
-                                    <?php  foreach($two as $tw):?>
+                        <div class="cat_detail">
+                            <?php  foreach($two as $tw):?>
+                            <dl class="dl_1st">
+
                                     <dt><a href="/goods/index?id=<?=$tw->id?>"><?=$tw->name?></a>
                                         <?php $three=\backend\models\GoodsCategory::find()->where(['parent_id'=>$tw->id])->all()?>
                                         <?php foreach($three as $thr):?>
                                         <dd>
                                         <a href="/goods/index?id=<?=$thr->id?>"><?=$thr->name?></a>
-</dd>
+                                        </dd>
                                         <?php endforeach;?>
                                     </dt>
                                     <?php endforeach;?>
-                                </dl>
-                            </div>
+                            </dl>
+                        </div>
 
-                </div>
+
+
+
+                    </div>
                 <?php endforeach;?>
-
-
 
 
 

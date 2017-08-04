@@ -72,14 +72,14 @@
                     <input type="text" class="txt" name="Member[email]" value="<?=$model->email?>"/>
                     <p></p>
                 </li>
-                <li id="tel">
+                <li id="li_tel">
                     <label for="">手机号码：</label>
-                    <input type="text" class="txt" value="<?=$model->tel?>" name="Member[tel]" id="tel" placeholder=""/>
+                    <input type="text" class="txt" value="<?=$model->tel?>" name="Member[tel]" id="telnum" placeholder=""/>
                 </li>
-                <!--                    <li>-->
-                <!--                        <label for="">验证码：</label>-->
-                <!--                        <input type="text" class="txt" value="" placeholder="请输入短信验证码" name="captcha" disabled="disabled" id="captcha"/> <input type="button" onclick="bindPhoneNum(this)" id="get_captcha" value="获取验证码" style="height: 25px;padding:3px 8px"/>-->
-                <!---->
+                                    <li>
+                                        <label for="">验证码：</label>
+                                        <input type="text" class="txt" value="" placeholder="请输入短信验证码" name="captcha" disabled="disabled" id="captcha"/> <input type="button" onclick="bindPhoneNum(this)" id="get_captcha" value="获取验证码" style="height: 25px;padding:3px 8px"/>
+
                 </li>
                 <li class="checkcode" id="code">
                     <?=$form->field($model,'code')->widget(\yii\captcha\Captcha::className(),['captchaAction'=>'member/captcha'])?>
@@ -140,24 +140,47 @@
 <script type="text/javascript" src="<?=\Yii::getAlias('@web')?>/js/jquery-1.8.3.min.js"></script>
 <script type="text/javascript">
     function bindPhoneNum(){
-        //启用输入框
-        $('#captcha').prop('disabled',false);
 
-        var time=30;
-        var interval = setInterval(function(){
-            time--;
-            if(time<=0){
-                clearInterval(interval);
-                var html = '获取验证码';
-                $('#get_captcha').prop('disabled',false);
-            } else{
-                var html = time + ' 秒后再次获取';
-                $('#get_captcha').prop('disabled',true);
-            }
 
-            $('#get_captcha').val(html);
-        },1000);
+
+        var myreg=/^1[3578]\d{9}$/;
+
+        var time=60;
+        var url = '/member/sms';
+        var num=$('#li_tel').find('.txt').val();
+
+        if(myreg.test(num)){
+            //启用输入框
+            $('#captcha').prop('disabled',false);
+            var args = 'tel='+num;
+            console.debug(args);
+            var interval = setInterval(function(){
+
+                time--;
+                if(time<=0){
+                    clearInterval(interval);
+                    var html = '获取验证码';
+                    $('#get_captcha').prop('disabled',false);
+                    $.getJSON(url,args,function(date){
+                        console.debug(date);
+                    });
+                } else{
+                    var html = time + ' 秒后再次获取';
+                    $('#get_captcha').prop('disabled',true);
+                }
+
+                $('#get_captcha').val(html);
+            },1000);
+        }else {
+            alert('请输入有效的手机号码');
+
+            return false;
+        }
+
     }
+
+
+
     <?php
     if($model->getErrors()) {
         foreach ($model->errors as $name => $error) {
@@ -174,6 +197,8 @@
         });
     });
 </script>
+
+
 
 </body>
 </html>

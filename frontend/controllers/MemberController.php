@@ -2,15 +2,19 @@
 
 namespace frontend\controllers;
 
+use Aliyun\Core\Config;
 use backend\models\GoodsCategory;
 use frontend\models\Address;
+use frontend\models\Cart;
 use frontend\models\Locations;
 use frontend\models\LoginForm;
 use frontend\models\Member;
 use yii\captcha\CaptchaAction;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
-
+use Aliyun\Api\Sms\Request\V20170525\SendSmsRequest;
+use Aliyun\Core\DefaultAcsClient;
+use Aliyun\Core\Profile\DefaultProfile;
 class MemberController extends \yii\web\Controller
 {
     public $layout=false;
@@ -28,6 +32,12 @@ class MemberController extends \yii\web\Controller
         return $this->render('register',['model'=>$model]);
     }
 
+    public function actionLogout()
+    {
+        \Yii::$app->user->logout();
+
+        return $this->goHome();
+    }
 
 
     //登录开始
@@ -41,7 +51,34 @@ class MemberController extends \yii\web\Controller
                 //var_dump($model);exit;
                  //var_dump($model);exit;
                 \yii::$app->session->setFlash('success','登陆成功');
-                $a=\Yii::$app->user->getIsGuest();
+                $member_id = \Yii::$app->user->identity->getId();
+                $cookies = \Yii::$app->request->cookies;
+                //var_dump($cookies);exit;
+                $carts = unserialize($cookies->get('cart'));
+                //var_dump($carts);exit;
+                if ($carts) {
+                    //var_dump(111);exit;
+
+                    foreach (array_keys($carts) as $v) {
+                        $model = new Cart();
+                        $models = Cart::find()
+                            ->andWhere(['member_id' => $member_id])
+                            ->andWhere(['goods_id' => $v])
+                            ->one();
+                        if (!$models) {
+                            $model->amount = $carts[$v];
+                            $model->goods_id = $v;
+                            $model->member_id = $member_id;
+                            $model->save(false);
+                        } else {
+                            $models->amount += $carts[$v];
+                            $models->save();
+                        }
+
+                    }
+                    \Yii::$app->response->cookies->remove('cart');
+                }
+                //$a=\Yii::$app->user->getIsGuest();
                 //var_dump($a);exit;
                 return $this->redirect(['index']);
             }else{
@@ -111,8 +148,10 @@ class MemberController extends \yii\web\Controller
     }
     public function actionIndex(){
         $models=GoodsCategory::find()->where(['parent_id'=>0])->all();
-        // var_dump($models);exit;
+
+
         return $this->render('index',['models'=>$models]);
+
     }
 
     //设置默认地址
@@ -149,46 +188,50 @@ class MemberController extends \yii\web\Controller
         var_dump(\Yii::$app->user->isGuest);
     }
 
-    public function actionSms(){
-        //此处需要替换成自己的AK信息
-//    $accessKeyId = "LTAIrerdM4zn8GSV";//参考本文档步骤2
-//    $accessKeySecret = "DZtwiEYwrA3EmqIOCegn6U4xZQYOsx";//参考本文档步骤2
-//    //短信API产品名（短信产品名固定，无需修改）
-//    $product = "Dysmsapi";
-//    //短信API产品域名（接口地址固定，无需修改）
-//    $domain = "dysmsapi.aliyuncs.com";
-//    //暂时不支持多Region（目前仅支持cn-hangzhou请勿修改）
-//    $region = "cn-hangzhou";
-//    //初始化访问的acsCleint
-//    $profile = DefaultProfile::getProfile($region, $accessKeyId, $accessKeySecret);
-//    DefaultProfile::addEndpoint("cn-hangzhou", "cn-hangzhou", $product, $domain);
-//    $acsClient= new DefaultAcsClient($profile);
-//    $request = new Dysmsapi\Request\V20170525\SendSmsRequest;
-//    //必填-短信接收号码。支持以逗号分隔的形式进行批量调用，批量上限为1000个手机号码,批量调用相对于单条调用及时性稍有延迟,验证码类型的短信推荐使用单条调用的方式
-//    $request->setPhoneNumbers("18881785105");
-//    //必填-短信签名
-//    $request->setSignName("小亮的茶馆");
-//    //必填-短信模板Code
-//    $request->setTemplateCode("SMS_80195051");
-//    //选填-假如模板中存在变量需要替换则为必填(JSON格式),友情提示:如果JSON中需要带换行符,请参照标准的JSON协议对换行符的要求,比如短信内容中包含\r\n的情况在JSON中需要表示成\\r\\n,否则会导致JSON在服务端解析失败
-//    $request->setTemplateParam("{\"code\":\"12345\",\"product\":\"云通信服务\"}");
-//    //选填-发送短信流水号
-//    $request->setOutId("1234");
-//    //发起访问请求
-//    $acsResponse = $acsClient->getAcsResponse($request);
-        $code = rand(1000,9999);
-        $tel = '18881785105';
-        $res = \Yii::$app->sms->setPhoneNumbers($tel)->setTemplateParam(['code'=>$code])->send();
-        //   return $res;
-        //var_dump($res);exit;
-        //将短信验证码保存redis（session，mysql）
-        \Yii::$app->session->set('code_'.$tel,$res);
-        //验证
-        $code2 = \Yii::$app->session->get('code_'.$tel);
-        if($code == $code2){
-        }else{
+    public function actionSms($tel){
+        Config::load();
+       // 此处需要替换成自己的AK信息
+    $accessKeyId = "LTAIrerdM4zn8GSV";//参考本文档步骤2
+    $accessKeySecret = "DZtwiEYwrA3EmqIOCegn6U4xZQYOsx";//参考本文档步骤2
+    //短信API产品名（短信产品名固定，无需修改）
+    $product = "Dysmsapi";
+    //短信API产品域名（接口地址固定，无需修改）
+    $domain = "dysmsapi.aliyuncs.com";
+    //暂时不支持多Region（目前仅支持cn-hangzhou请勿修改）
+    $region = "cn-hangzhou";
+    //初始化访问的acsCleint
+    $profile = DefaultProfile::getProfile($region, $accessKeyId, $accessKeySecret);
+    DefaultProfile::addEndpoint("cn-hangzhou", "cn-hangzhou", $product, $domain);
+    $acsClient= new DefaultAcsClient($profile);
+    $request = new SendSmsRequest;
+    //必填-短信接收号码。支持以逗号分隔的形式进行批量调用，批量上限为1000个手机号码,批量调用相对于单条调用及时性稍有延迟,验证码类型的短信推荐使用单条调用的方式
+    $request->setPhoneNumbers($tel);
+    //必填-短信签名
+    $request->setSignName("小亮的茶馆");
+    //必填-短信模板Code
+    $request->setTemplateCode("SMS_80195051");
 
-        }
+    //选填-假如模板中存在变量需要替换则为必填(JSON格式),友情提示:如果JSON中需要带换行符,请参照标准的JSON协议对换行符的要求,比如短信内容中包含\r\n的情况在JSON中需要表示成\\r\\n,否则会导致JSON在服务端解析失败
+        $code = rand(1000,9999);
+        $request->setTemplateParam("{\"code\":\"$code\",\"product\":\"云通信服务\"}");
+    //选填-发送短信流水号
+    $request->setOutId("1234");
+    //发起访问请求
+    $acsResponse = $acsClient->getAcsResponse($request);
+    var_dump($tel);
+//        $code = rand(1000,9999);
+//        $tel = '18728069135';
+//        $res = \Yii::$app->sms->setPhoneNumbers($tel)->setTemplateParam(['code'=>$code])->send();
+//        //   return $res;
+//        //var_dump($res);exit;
+//        //将短信验证码保存redis（session，mysql）
+//        \Yii::$app->session->set('code_'.$tel,$res);
+//        //验证
+//        $code2 = \Yii::$app->session->get('code_'.$tel);
+//        if($code == $code2){
+//        }else{
+//
+//        }
 
     }
 }

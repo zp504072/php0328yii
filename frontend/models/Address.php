@@ -32,11 +32,11 @@ class Address extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name','province','center','area','tel','address'],'required'],
+            [['name','province','center','area','tel','address','tel'],'required'],
             [['status'], 'safe'],
             [['name'], 'string', 'max' => 20],
             [['address'], 'string', 'max' => 255],
-            [['tel'], 'string', 'max' => 11],
+
         ];
     }
 

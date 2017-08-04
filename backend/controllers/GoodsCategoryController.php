@@ -8,11 +8,11 @@ use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
 
-class GoodsCategoryController extends \yii\web\Controller
+class GoodsCategoryController extends BaseController
 {
     public function actionIndex()
     {
-        $model=GoodsCategory::find()->all();
+        $model=GoodsCategory::find()->orderBy('tree asc,lft asc')->all();
 
         return $this->render('index',['model'=>$model]);
     }
@@ -98,14 +98,6 @@ class GoodsCategoryController extends \yii\web\Controller
         }
 
         return $this->redirect(['index']);
-    }
-    public function behaviors()
-    {
-        return [
-            'rbac'=>[
-                'class'=>RbacFilter::className(),
-            ]
-        ];
     }
 
 

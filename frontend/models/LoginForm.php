@@ -48,6 +48,7 @@ class LoginForm extends Model{
                 $user->last_login_ip=$_SERVER['REMOTE_ADDR'];
                 $user->save(false);
 
+
                // var_dump($user);exit;
                 return true;
             }else{

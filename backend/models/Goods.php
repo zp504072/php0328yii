@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use frontend\models\Cart;
 use Yii;
 
 /**
@@ -86,6 +87,10 @@ class Goods extends \yii\db\ActiveRecord
             'create_time' => '添加时间',
             'view_times' => '浏览次数',
         ];
+    }
+    public function getAmount(){
+
+        return $this->hasOne(Cart::className(),['goods_id'=>'id'])->where(['member_id'=>Yii::$app->user->id]);
     }
 
 
